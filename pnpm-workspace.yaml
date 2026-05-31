@@ -1,0 +1,7 @@
+packages:
+  - 'server'
+  - 'client'
+allowBuilds:
+  esbuild: set this to true or false
+  mongodb-memory-server: set this to true or false
+  sharp: set this to true or false

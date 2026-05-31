@@ -1,0 +1,30 @@
+{
+  "name": "gsp-workflow-prototype",
+  "version": "1.0.0",
+  "private": true,
+  "description": "GSP student application workflow prototype — StudyNow Ltd technical assessment",
+  "scripts": {
+    "dev": "concurrently \"pnpm --filter @gsp/server dev\" \"pnpm --filter @gsp/client dev\"",
+    "dev:server": "pnpm --filter @gsp/server dev",
+    "dev:client": "pnpm --filter @gsp/client dev",
+    "build": "pnpm --filter @gsp/server build && pnpm --filter @gsp/client build",
+    "seed": "pnpm --filter @gsp/server seed",
+    "test": "pnpm --filter @gsp/server test",
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "mongodb-memory-server",
+      "sharp",
+      "@next/swc-win32-x64-msvc"
+    ]
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}
