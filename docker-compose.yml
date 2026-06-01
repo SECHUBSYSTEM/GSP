@@ -1,6 +1,9 @@
+name: gsp
+
 services:
   mongo:
     image: mongo:7
+    container_name: gsp-mongo
     ports:
       - '27017:27017'
     volumes:

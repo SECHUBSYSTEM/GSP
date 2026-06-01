@@ -10,6 +10,9 @@
     "build": "pnpm --filter @gsp/server build && pnpm --filter @gsp/client build",
     "seed": "pnpm --filter @gsp/server seed",
     "test": "pnpm --filter @gsp/server test",
+    "test:unit": "pnpm --filter @gsp/server test:unit",
+    "test:coverage": "pnpm --filter @gsp/server test:unit:coverage",
+    "test:smoke": "pnpm --filter @gsp/server test:smoke",
     "docker:up": "docker compose up -d",
     "docker:down": "docker compose down"
   },

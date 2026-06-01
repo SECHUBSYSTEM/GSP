@@ -10,6 +10,7 @@
     "seed": "tsx src/seed.ts",
     "test": "vitest run ../tests/workflow && tsx ../tests/api/smoke.run.ts",
     "test:unit": "vitest run ../tests/workflow",
+    "test:unit:coverage": "vitest run ../tests/workflow --coverage",
     "test:smoke": "tsx ../tests/api/smoke.run.ts"
   },
   "dependencies": {
@@ -29,6 +30,7 @@
     "@types/express": "^5.0.0",
     "@types/multer": "^1.4.12",
     "@types/node": "^22.10.5",
+    "@vitest/coverage-v8": "^2.1.8",
     "tsx": "^4.19.2",
     "typescript": "^5.7.2",
     "vitest": "^2.1.8"

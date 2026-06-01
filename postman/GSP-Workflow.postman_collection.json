@@ -185,7 +185,10 @@
               { "key": "Content-Type", "value": "application/json" },
               { "key": "X-User-Id", "value": "{{counsellorUserId}}" }
             ],
-            "body": { "mode": "raw", "raw": "{\n  \"targetStage\": \"qa_review\"\n}" },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"targetStage\": \"qa_review\"\n}"
+            },
             "url": "{{baseUrl}}/applications/{{applicationId}}/transition"
           }
         },
@@ -208,7 +211,10 @@
               { "key": "Content-Type", "value": "application/json" },
               { "key": "X-User-Id", "value": "{{qaUserId}}" }
             ],
-            "body": { "mode": "raw", "raw": "{\n  \"targetStage\": \"app_review\"\n}" },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"targetStage\": \"app_review\"\n}"
+            },
             "url": "{{baseUrl}}/applications/{{applicationId}}/transition"
           }
         },

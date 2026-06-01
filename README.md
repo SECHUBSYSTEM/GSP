@@ -32,13 +32,25 @@ pnpm dev
 | Demo UI | http://localhost:3000 |
 | Health | http://localhost:4000/health |
 
+### Docker troubleshooting (Windows)
+
+If `pnpm docker:up` fails with `dockerDesktopLinuxEngine` or `502 Bad Gateway`:
+
+1. Open **Docker Desktop** and wait until the engine shows **Running** (not just the UI open)
+2. Run `docker version` — you must see both **Client** and **Server** sections
+3. Retry: `pnpm docker:up`
+4. Confirm: `docker ps` shows `gsp-mongo` on port `27017`
+
+If Docker remains unreliable, use [MongoDB Atlas](https://www.mongodb.com/atlas) and set `MONGODB_URI` in `.env` instead.
+
 ---
 
 ## Postman
 
 1. Import [`postman/GSP-Workflow.postman_collection.json`](postman/GSP-Workflow.postman_collection.json)
-2. Run the **Setup** folder (creates users and stores IDs in collection variables)
-3. Run **Agent flow** and **Internal workflow** folders
+2. Import [`postman/GSP-Local.postman_environment.json`](postman/GSP-Local.postman_environment.json) and select **GSP Local**
+3. Run the **Setup** folder (creates users and stores IDs in collection variables)
+4. Run **Agent flow** and **Internal workflow** folders
 
 Every request uses the `X-User-Id` header. Create your own users with:
 
@@ -151,12 +163,57 @@ Toggle: `EXPOSE_ERROR_HINTS=false` in `.env` to simulate production API response
 
 ## Testing
 
+### Commands
+
 ```bash
-pnpm test
+pnpm test:unit              # Workflow unit tests (no DB required)
+pnpm test:coverage          # Unit tests + workflow kernel coverage report
+pnpm test:smoke             # API smoke test (requires MongoDB — run pnpm docker:up first)
+pnpm test                   # Unit + smoke
 ```
 
-- **Workflow unit tests** — rules, transitions, permissions, actions (no DB)
-- **API smoke test** — create user → app → blocked transition
+### Latest test report
+
+| Suite | Tests | Status | Notes |
+|-------|-------|--------|-------|
+| Workflow unit (`tests/workflow/workflow.test.ts`) | 11 | Pass | Rules, transitions, permissions, contextual actions |
+| API smoke (`tests/api/smoke.run.ts`) | 1 flow | Requires MongoDB | Create user → app → blocked transition with hint |
+
+**Workflow unit scenarios covered:**
+- QA → App Review blocked without required documents
+- QA → App Review allowed when documents complete
+- App Review → Decision blocked without admission review note
+- Idempotent same-stage transition check
+- Agent blocked from internal transitions
+- `drop_out`, `app_rejected`, `refund` action stage rules
+- Agent sees only `withdraw` action
+- Agent blocked from other agent's applications
+- Terminal state blocks further transitions
+
+### Coverage (workflow kernel)
+
+Run `pnpm test:coverage`. Coverage targets `server/src/workflow/` — the core state machine:
+
+| Module | Statements | Branches | Functions |
+|--------|------------|----------|-----------|
+| **All workflow files** | ~76% | ~79% | ~59% |
+| `actions.ts` | ~94% | 100% | ~67% |
+| `rules.ts` | ~84% | 100% | ~88% |
+| `transitions.ts` | ~83% | ~67% | ~67% |
+| `index.ts` | ~59% | ~68% | 60% |
+
+Coverage is intentionally focused on the workflow kernel. Route and integration layers are covered by the API smoke test.
+
+---
+
+## Pre-demo checklist (for you)
+
+- [ ] Docker running → `pnpm docker:up` → `docker ps` shows `gsp-mongo`
+- [ ] `.env` configured (Cloudinary + Gemini optional; mock AI works without keys)
+- [ ] `pnpm seed` (prints user IDs — use in UI or Postman)
+- [ ] `pnpm dev` → API :4000, UI :3000
+- [ ] Postman Setup folder passes
+- [ ] Read local `WALKTHROUGH_NOTES.md` (gitignored — interview prep)
 
 ---
 
