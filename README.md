@@ -213,7 +213,6 @@ Coverage is intentionally focused on the workflow kernel. Route and integration 
 - [ ] `pnpm seed` (prints user IDs — use in UI or Postman)
 - [ ] `pnpm dev` → API :4000, UI :3000
 - [ ] Postman Setup folder passes
-- [ ] Read local `WALKTHROUGH_NOTES.md` (gitignored — interview prep)
 
 ---
 

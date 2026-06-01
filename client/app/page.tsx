@@ -334,9 +334,9 @@ export default function DemoPage() {
             <p>
               <strong>Status:</strong>{' '}
               {(appDetail.statusLabel as string) ?? (appDetail.stageLabel as string)}
-              {isInternal && appDetail.stage && (
+              {isInternal && appDetail.stage != null ? (
                 <span className="muted"> (internal: {String(appDetail.stage)})</span>
-              )}
+              ) : null}
             </p>
 
             {isInternal && transitions.length > 0 && (
