@@ -609,8 +609,139 @@ button:disabled {
 .ai-panel-header {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 0.5rem;
   margin-bottom: 0.5rem;
+}
+
+.ai-refresh-btn {
+  margin-left: auto;
+  padding: 0.35rem 0.75rem !important;
+  font-size: 0.78rem !important;
+}
+
+.status-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.status-chip {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.35rem 0.65rem;
+  border-radius: var(--radius-full);
+}
+
+.status-chip.deferred {
+  background: #fffbeb;
+  color: #b45309;
+  border: 1px solid #fcd34d;
+}
+
+.status-chip.closed {
+  background: #f1f5f9;
+  color: #475569;
+  border: 1px solid var(--border-strong);
+}
+
+.status-chip.refund {
+  background: #fef2f2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+}
+
+.status-chip.rejected {
+  background: #fef2f2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+}
+
+.app-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+@media (max-width: 700px) {
+  .app-info-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.info-card {
+  padding: 1rem 1.125rem;
+  background: var(--bg-accent);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+}
+
+.info-card h3 {
+  margin: 0 0 0.625rem;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+}
+
+.info-card p {
+  margin: 0.25rem 0;
+}
+
+.form-hint {
+  margin-top: 0.5rem !important;
+  font-size: 0.78rem !important;
+}
+
+.detail-list {
+  margin: 1.25rem 0;
+}
+
+.detail-list h3 {
+  margin: 0 0 0.625rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+}
+
+.detail-list ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.detail-list li {
+  padding: 0.625rem 0.875rem;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.detail-list li:last-child {
+  border-bottom: none;
+}
+
+.list-primary {
+  font-size: 0.875rem;
+  color: var(--text);
+}
+
+.list-secondary {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.list-empty {
+  margin: 0;
+  font-size: 0.875rem;
 }
 
 .ai-panel-header strong {

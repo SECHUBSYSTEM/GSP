@@ -73,6 +73,90 @@ function Pipeline({ currentStage }: { currentStage: string }) {
   );
 }
 
+function StatusMeta({
+  appDetail,
+  isInternal,
+}: {
+  appDetail: Record<string, unknown>;
+  isInternal: boolean;
+}) {
+  const appStatus = String(
+    appDetail.status ?? appDetail.applicationStatus ?? "active",
+  );
+  const chips: Array<{ key: string; label: string; className: string }> = [];
+
+  if (appStatus === "deferred" || appDetail.transitionsPaused) {
+    chips.push({
+      key: "deferred",
+      label: "Deferred — transitions paused",
+      className: "status-chip deferred",
+    });
+  }
+  if (appDetail.closedReason) {
+    chips.push({
+      key: "closed",
+      label: `Closed: ${String(appDetail.closedReason).replace(/_/g, " ")}`,
+      className: "status-chip closed",
+    });
+  }
+  if (appDetail.refundFlag) {
+    chips.push({
+      key: "refund",
+      label: "Refund flagged",
+      className: "status-chip refund",
+    });
+  }
+  if (appDetail.rejectionStage && isInternal) {
+    chips.push({
+      key: "rejected",
+      label: `Rejected at ${String(appDetail.rejectionStage).replace(/_/g, " ")}`,
+      className: "status-chip rejected",
+    });
+  }
+
+  if (chips.length === 0) return null;
+
+  return (
+    <div className="status-meta">
+      {chips.map((c) => (
+        <span key={c.key} className={c.className}>
+          {c.label}
+        </span>
+      ))}
+    </div>
+  );
+}
+
+function DetailList({
+  title,
+  items,
+  empty,
+}: {
+  title: string;
+  items: Array<{ key: string; primary: string; secondary?: string }>;
+  empty: string;
+}) {
+  return (
+    <div className="detail-list">
+      <h3>{title}</h3>
+      {items.length === 0 ? (
+        <p className="muted list-empty">{empty}</p>
+      ) : (
+        <ul>
+          {items.map((item) => (
+            <li key={item.key}>
+              <span className="list-primary">{item.primary}</span>
+              {item.secondary ? (
+                <span className="list-secondary">{item.secondary}</span>
+              ) : null}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
 function AlertIcon({ type }: { type: Alert["type"] }) {
   if (type === "success") {
     return (
@@ -147,6 +231,11 @@ export default function DemoPage() {
     university: "",
     intake: "",
   });
+  const [editCourse, setEditCourse] = useState({
+    name: "",
+    university: "",
+    intake: "",
+  });
 
   const selectedUser = users.find((u) => u.id === selectedUserId);
 
@@ -214,6 +303,20 @@ export default function DemoPage() {
     if (selectedAppId) void refreshAppDetail().catch(showError);
   }, [selectedAppId, refreshAppDetail]);
 
+  useEffect(() => {
+    if (!appDetail?.course) return;
+    const course = appDetail.course as {
+      name?: string;
+      university?: string;
+      intake?: string;
+    };
+    setEditCourse({
+      name: course.name ?? "",
+      university: course.university ?? "",
+      intake: course.intake ?? "",
+    });
+  }, [appDetail?.course, selectedAppId]);
+
   async function handleCreateUser() {
     setLoading(true);
     try {
@@ -279,10 +382,39 @@ export default function DemoPage() {
     if (!selectedUserId || !selectedAppId) return;
     setLoading(true);
     try {
-      const res = await api.action(selectedUserId, selectedAppId, action);
+      const payload =
+        action === "change_course"
+          ? {
+              course: {
+                name: editCourse.name,
+                university: editCourse.university,
+                intake: editCourse.intake,
+              },
+            }
+          : undefined;
+      const res = await api.action(
+        selectedUserId,
+        selectedAppId,
+        action,
+        payload,
+      );
       setAppDetail(res.data);
       showSuccess(res.message);
       await refreshApplications();
+    } catch (err) {
+      showError(err);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleRefreshAi() {
+    if (!selectedUserId || !selectedAppId) return;
+    setLoading(true);
+    try {
+      const res = await api.refreshAi(selectedUserId, selectedAppId);
+      setAppDetail(res.data);
+      showSuccess(res.message);
     } catch (err) {
       showError(err);
     } finally {
@@ -339,6 +471,26 @@ export default function DemoPage() {
     unknown
   > | null;
   const currentStage = String(appDetail?.stage ?? "");
+  const student = appDetail?.student as
+    | { name?: string; email?: string; nationality?: string }
+    | undefined;
+  const documents =
+    (appDetail?.documents as Array<{
+      type?: string;
+      url?: string;
+      uploadedAt?: string;
+    }>) ?? [];
+  const notes =
+    (appDetail?.notes as Array<{
+      text?: string;
+      createdAt?: string;
+      isReviewNote?: boolean;
+      authorRole?: string;
+    }>) ?? [];
+  const canEditCourse =
+    isInternal &&
+    (currentStage === "qa_review" || currentStage === "app_review") &&
+    ["counsellor", "admission_officer"].includes(selectedUser?.role ?? "");
 
   return (
     <>
@@ -594,6 +746,88 @@ export default function DemoPage() {
                 ) : null}
               </div>
 
+              <StatusMeta
+                appDetail={appDetail}
+                isInternal={Boolean(isInternal)}
+              />
+
+              {(student || editCourse.name) && (
+                <div className="app-info-grid">
+                  {student && (
+                    <div className="info-card">
+                      <h3>Student</h3>
+                      <p>
+                        <strong>{student.name}</strong>
+                      </p>
+                      <p className="muted">{student.email}</p>
+                      {student.nationality ? (
+                        <p className="muted">{student.nationality}</p>
+                      ) : null}
+                    </div>
+                  )}
+                  <div className="info-card">
+                    <h3>Course</h3>
+                    {canEditCourse ? (
+                      <>
+                        <div className="field">
+                          <label htmlFor="editCourseName">Course name</label>
+                          <input
+                            id="editCourseName"
+                            value={editCourse.name}
+                            onChange={(e) =>
+                              setEditCourse({
+                                ...editCourse,
+                                name: e.target.value,
+                              })
+                            }
+                          />
+                        </div>
+                        <div className="field">
+                          <label htmlFor="editUniversity">University</label>
+                          <input
+                            id="editUniversity"
+                            value={editCourse.university}
+                            onChange={(e) =>
+                              setEditCourse({
+                                ...editCourse,
+                                university: e.target.value,
+                              })
+                            }
+                          />
+                        </div>
+                        <div className="field">
+                          <label htmlFor="editIntake">Intake</label>
+                          <input
+                            id="editIntake"
+                            value={editCourse.intake}
+                            onChange={(e) =>
+                              setEditCourse({
+                                ...editCourse,
+                                intake: e.target.value,
+                              })
+                            }
+                          />
+                        </div>
+                        <p className="muted form-hint">
+                          Edit fields above, then use Change Course to apply and
+                          refresh AI.
+                        </p>
+                      </>
+                    ) : (
+                      <>
+                        <p>
+                          <strong>{editCourse.name || "—"}</strong>
+                        </p>
+                        <p className="muted">{editCourse.university}</p>
+                        {editCourse.intake ? (
+                          <p className="muted">Intake: {editCourse.intake}</p>
+                        ) : null}
+                      </>
+                    )}
+                  </div>
+                </div>
+              )}
+
               {isInternal && currentStage && (
                 <Pipeline currentStage={currentStage} />
               )}
@@ -623,46 +857,88 @@ export default function DemoPage() {
                 <div className="action-group">
                   <p className="action-group-title">Contextual actions</p>
                   <div className="action-chips">
-                    {actions
-                      .filter((a) => !a.blocked)
-                      .map((a) => (
-                        <button
-                          key={String(a.action)}
-                          className={
-                            String(a.action).includes("reject")
-                              ? "danger"
-                              : "secondary"
-                          }
-                          disabled={loading}
-                          onClick={() => runAction(String(a.action))}>
-                          {String(a.label ?? a.action)}
-                        </button>
-                      ))}
+                    {actions.map((a) => (
+                      <button
+                        key={String(a.action)}
+                        className={
+                          String(a.action).includes("reject")
+                            ? "danger"
+                            : "secondary"
+                        }
+                        disabled={loading || Boolean(a.blocked)}
+                        title={String(a.hint ?? a.reason ?? "")}
+                        onClick={() => runAction(String(a.action))}>
+                        {String(a.label ?? a.action)}
+                        {a.blocked ? (
+                          <span className="blocked-hint"> (blocked)</span>
+                        ) : null}
+                      </button>
+                    ))}
                   </div>
                 </div>
               )}
 
-              {isInternal && aiAssessment ? (
+              {isInternal && (
                 <div className="ai-panel">
                   <div className="ai-panel-header">
                     <strong>AI Assessment</strong>
                     <span className="ai-badge">Advisory</span>
+                    <button
+                      className="secondary ai-refresh-btn"
+                      disabled={loading}
+                      onClick={handleRefreshAi}>
+                      Refresh AI
+                    </button>
                   </div>
-                  <p>{String(aiAssessment.summary)}</p>
-                  <div className="ai-meta">
-                    <span className="ai-stat">
-                      Readiness:{" "}
-                      <strong>{String(aiAssessment.readinessScore)}</strong>
-                    </span>
-                    <span className="ai-stat">
-                      Recommendation:{" "}
-                      <strong>{String(aiAssessment.recommendation)}</strong>
-                    </span>
-                  </div>
+                  {aiAssessment ? (
+                    <>
+                      <p>{String(aiAssessment.summary)}</p>
+                      <div className="ai-meta">
+                        <span className="ai-stat">
+                          Readiness:{" "}
+                          <strong>{String(aiAssessment.readinessScore)}</strong>
+                        </span>
+                        <span className="ai-stat">
+                          Recommendation:{" "}
+                          <strong>{String(aiAssessment.recommendation)}</strong>
+                        </span>
+                        <span className="ai-stat">
+                          Provider:{" "}
+                          <strong>{String(aiAssessment.provider)}</strong>
+                          {aiAssessment.model
+                            ? ` / ${String(aiAssessment.model)}`
+                            : ""}
+                        </span>
+                        {aiAssessment.status ? (
+                          <span className="ai-stat">
+                            Status:{" "}
+                            <strong>{String(aiAssessment.status)}</strong>
+                          </span>
+                        ) : null}
+                      </div>
+                    </>
+                  ) : (
+                    <p className="muted">
+                      No AI assessment for this stage yet. Use Refresh AI after
+                      uploads or course changes.
+                    </p>
+                  )}
                 </div>
-              ) : null}
+              )}
 
-              <h3>Documents</h3>
+              <DetailList
+                title="Uploaded documents"
+                empty="No documents uploaded yet."
+                items={documents.map((d, i) => ({
+                  key: `${d.type}-${i}`,
+                  primary: String(d.type ?? "document").replace(/_/g, " "),
+                  secondary: d.uploadedAt
+                    ? new Date(String(d.uploadedAt)).toLocaleString()
+                    : undefined,
+                }))}
+              />
+
+              <h3>Upload documents</h3>
               <div className="doc-grid">
                 {DOC_TYPES.map((type) => (
                   <div key={type} className="doc-upload">
@@ -679,6 +955,24 @@ export default function DemoPage() {
                   </div>
                 ))}
               </div>
+
+              <DetailList
+                title="Notes"
+                empty="No notes yet."
+                items={[...notes].reverse().map((n, i) => ({
+                  key: `note-${i}`,
+                  primary: String(n.text ?? ""),
+                  secondary: [
+                    n.isReviewNote ? "Review note" : null,
+                    n.authorRole,
+                    n.createdAt
+                      ? new Date(String(n.createdAt)).toLocaleString()
+                      : null,
+                  ]
+                    .filter(Boolean)
+                    .join(" · "),
+                }))}
+              />
 
               <div className="note-section">
                 <h3>Add note</h3>
