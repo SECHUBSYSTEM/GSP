@@ -8,10 +8,7 @@ coverage/
 *.tsbuildinfo
 .DS_Store
 
-# Private interview prep — not submitted
-WALKTHROUGH_NOTES.md
-.ai-scratch/
-*.prompt-draft.md
+
 .cursor/
 
 # Upload temp
