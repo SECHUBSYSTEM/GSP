@@ -4,9 +4,9 @@
   "private": true,
   "description": "GSP student application workflow prototype — StudyNow Ltd technical assessment",
   "scripts": {
-    "dev": "concurrently \"pnpm --filter @gsp/server dev\" \"pnpm --filter @gsp/client dev\"",
+    "dev": "concurrently \"pnpm --filter @gsp/server dev\" \"pnpm --filter @gsp/client dev -p 3003\"",
     "dev:server": "pnpm --filter @gsp/server dev",
-    "dev:client": "pnpm --filter @gsp/client dev",
+    "dev:client": "pnpm --filter @gsp/client dev -p 3003",
     "build": "pnpm --filter @gsp/server build && pnpm --filter @gsp/client build",
     "seed": "pnpm --filter @gsp/server seed",
     "test": "pnpm --filter @gsp/server test",

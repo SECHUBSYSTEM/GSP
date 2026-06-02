@@ -29,7 +29,7 @@ pnpm dev
 | Service | URL |
 |---------|-----|
 | API | http://localhost:4000 |
-| Demo UI | http://localhost:3000 |
+| Demo UI | http://localhost:3003 |
 | Health | http://localhost:4000/health |
 
 ### Docker troubleshooting (Windows)
@@ -211,7 +211,7 @@ Coverage is intentionally focused on the workflow kernel. Route and integration 
 - [ ] Docker running → `pnpm docker:up` → `docker ps` shows `gsp-mongo`
 - [ ] `.env` configured (Cloudinary + Gemini optional; mock AI works without keys)
 - [ ] `pnpm seed` (prints user IDs — use in UI or Postman)
-- [ ] `pnpm dev` → API :4000, UI :3000
+- [ ] `pnpm dev` → API :4000, UI :3003
 - [ ] Postman Setup folder passes
 
 ---
