@@ -8,12 +8,7 @@ coverage/
 *.tsbuildinfo
 .DS_Store
 
-# Private / AI-assisted — not for submission
-WALKTHROUGH_NOTES.md
-.ai-scratch/
-*.prompt-draft.md
 .cursor/
-debug-*.log
 
 # Upload temp
 server/uploads/
