@@ -1,4 +1,4 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 
 export interface ApiUser {
   id: string;
@@ -22,13 +22,13 @@ export interface ApiError {
 async function apiFetch<T>(
   path: string,
   userId: string,
-  options: RequestInit = {}
+  options: RequestInit = {},
 ): Promise<T> {
   const res = await fetch(`${API_URL}${path}`, {
     ...options,
     headers: {
-      'Content-Type': 'application/json',
-      'X-User-Id': userId,
+      "Content-Type": "application/json",
+      "X-User-Id": userId,
       ...(options.headers ?? {}),
     },
   });
@@ -36,7 +36,7 @@ async function apiFetch<T>(
   const body = await res.json().catch(() => ({}));
   if (!res.ok) {
     const err = body as ApiError;
-    const message = err.error?.message ?? err.message ?? 'Request failed';
+    const message = err.error?.message ?? err.message ?? "Request failed";
     const hint = err.error?.hint;
     throw new Error(hint ? `${message} — ${hint}` : message);
   }
@@ -46,7 +46,7 @@ async function apiFetch<T>(
 export const api = {
   listUsers: async (userId: string) => {
     try {
-      return await apiFetch<{ data: ApiUser[] }>('/users', userId);
+      return await apiFetch<{ data: ApiUser[] }>("/users", userId);
     } catch {
       const res = await fetch(`${API_URL}/bootstrap/users`);
       const body = await res.json();
@@ -56,17 +56,21 @@ export const api = {
 
   createUser: (payload: { name: string; email: string; role: string }) =>
     fetch(`${API_URL}/users`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     }).then(async (res) => {
       const body = await res.json();
-      if (!res.ok) throw new Error(body.error?.message ?? 'Failed to create user');
+      if (!res.ok) {
+        const hint = body.error?.hint;
+        const message = body.error?.message ?? "Failed to create user";
+        throw new Error(hint ? `${message} — ${hint}` : message);
+      }
       return body.data as ApiUser & { hint?: string };
     }),
 
   listApplications: (userId: string) =>
-    apiFetch<{ data: unknown[] }>('/applications', userId),
+    apiFetch<{ data: unknown[] }>("/applications", userId),
 
   getApplication: (userId: string, id: string) =>
     apiFetch<{ data: Record<string, unknown> }>(`/applications/${id}`, userId),
@@ -76,58 +80,72 @@ export const api = {
     payload: {
       student: { name: string; email: string; nationality: string };
       course: { name: string; university: string; intake: string };
-    }
+    },
   ) =>
     apiFetch<{ data: Record<string, unknown>; message: string }>(
-      '/applications',
+      "/applications",
       userId,
-      { method: 'POST', body: JSON.stringify(payload) }
+      { method: "POST", body: JSON.stringify(payload) },
     ),
 
   transition: (userId: string, id: string, targetStage: string) =>
-    apiFetch<{ data: Record<string, unknown>; message: string; noOp?: boolean }>(
-      `/applications/${id}/transition`,
-      userId,
-      { method: 'POST', body: JSON.stringify({ targetStage }) }
-    ),
+    apiFetch<{
+      data: Record<string, unknown>;
+      message: string;
+      noOp?: boolean;
+    }>(`/applications/${id}/transition`, userId, {
+      method: "POST",
+      body: JSON.stringify({ targetStage }),
+    }),
 
   action: (userId: string, id: string, action: string, payload?: object) =>
     apiFetch<{ data: Record<string, unknown>; message: string }>(
       `/applications/${id}/actions/${action}`,
       userId,
-      { method: 'POST', body: JSON.stringify(payload ?? {}) }
+      { method: "POST", body: JSON.stringify(payload ?? {}) },
     ),
 
   addNote: (userId: string, id: string, text: string, isReviewNote = false) =>
     apiFetch<{ data: Record<string, unknown>; message: string }>(
       `/applications/${id}/notes`,
       userId,
-      { method: 'POST', body: JSON.stringify({ text, isReviewNote }) }
+      { method: "POST", body: JSON.stringify({ text, isReviewNote }) },
     ),
 
-  uploadDocument: async (userId: string, id: string, type: string, file: File) => {
+  uploadDocument: async (
+    userId: string,
+    id: string,
+    type: string,
+    file: File,
+  ) => {
     const form = new FormData();
-    form.append('type', type);
-    form.append('file', file);
+    form.append("type", type);
+    form.append("file", file);
     const res = await fetch(`${API_URL}/applications/${id}/documents`, {
-      method: 'POST',
-      headers: { 'X-User-Id': userId },
+      method: "POST",
+      headers: { "X-User-Id": userId },
       body: form,
     });
     const body = await res.json();
     if (!res.ok) {
       const hint = body.error?.hint;
       throw new Error(
-        hint ? `${body.error.message} — ${hint}` : body.error?.message ?? 'Upload failed'
+        hint
+          ? `${body.error.message} — ${hint}`
+          : (body.error?.message ?? "Upload failed"),
       );
     }
-    return body as { data: Record<string, unknown>; message: string; hint?: string };
+    return body as {
+      data: Record<string, unknown>;
+      message: string;
+      hint?: string;
+    };
   },
 
   refreshAi: (userId: string, id: string) =>
     apiFetch<{ data: Record<string, unknown>; message: string }>(
       `/applications/${id}/ai-assessment/refresh`,
       userId,
-      { method: 'POST', body: JSON.stringify({ force: true }) }
+      { method: "POST", body: JSON.stringify({ force: true }) },
     ),
 };

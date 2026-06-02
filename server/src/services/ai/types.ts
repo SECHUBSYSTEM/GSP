@@ -25,5 +25,5 @@ export interface StoredAiAssessment extends AiAssessmentResult {
   stage: ApplicationSnapshot['stage'];
   advisory: true;
   generatedAt: Date;
-  status: 'complete' | 'failed' | 'timeout';
+  status: 'complete' | 'failed' | 'timeout' | 'fallback';
 }

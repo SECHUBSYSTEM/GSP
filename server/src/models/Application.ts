@@ -39,7 +39,7 @@ const aiAssessmentSchema = new Schema(
     summary: { type: String, required: true },
     advisory: { type: Boolean, default: true },
     generatedAt: { type: Date, default: Date.now },
-    status: { type: String, enum: ['complete', 'failed', 'timeout'], required: true },
+    status: { type: String, enum: ['complete', 'failed', 'timeout', 'fallback'], required: true },
   },
   { _id: false }
 );

@@ -15,7 +15,7 @@ pnpm install
 # 2. Start MongoDB
 pnpm docker:up
 
-# 3. Configure environment
+# 3. Configure environment (`.env` at repo root — loaded automatically by the server)
 cp .env.example .env
 # Optional: add Cloudinary + GEMINI_API_KEY for live uploads/AI
 
@@ -154,7 +154,7 @@ Toggle: `EXPOSE_ERROR_HINTS=false` in `.env` to simulate production API response
 | `PORT` | 4000 | API port |
 | `MONGODB_URI` | localhost | MongoDB connection |
 | `EXPOSE_ERROR_HINTS` | true | Demo: show hints in API; prod: false |
-| `AI_PROVIDER` | mock | mock, gemini, or openai |
+| `AI_PROVIDER` | mock | mock, gemini, or openai — set in repo-root `.env` |
 | `GEMINI_API_KEY` | — | Google AI key |
 | `GEMINI_MODEL` | gemini-2.0-flash | Configurable Gemini model |
 | `CLOUDINARY_*` | — | Optional real file uploads |

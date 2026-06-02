@@ -2,7 +2,7 @@
  * API smoke test — requires MongoDB at MONGODB_URI (run `pnpm docker:up` first).
  * Run via: pnpm --filter @gsp/server test:smoke
  */
-import 'dotenv/config';
+import '../../server/src/config/loadEnv.js';
 import mongoose from 'mongoose';
 import { createApp } from '../../server/src/app.js';
 import { connectDatabase, disconnectDatabase } from '../../server/src/config/database.js';

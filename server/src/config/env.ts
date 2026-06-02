@@ -1,4 +1,4 @@
-import 'dotenv/config';
+import './loadEnv.js';
 import { z } from 'zod';
 
 const envSchema = z.object({
@@ -30,5 +30,23 @@ export function isCloudinaryConfigured(): boolean {
     env.CLOUDINARY_CLOUD_NAME &&
       env.CLOUDINARY_API_KEY &&
       env.CLOUDINARY_API_SECRET
+  );
+}
+
+export function logStartupConfig(): void {
+  if (env.AI_PROVIDER === 'mock') {
+    console.log('[GSP] AI provider: mock');
+    return;
+  }
+  if (env.AI_PROVIDER === 'gemini') {
+    const ok = Boolean(env.GEMINI_API_KEY?.trim());
+    console.log(
+      `[GSP] AI provider: gemini (${ok ? `model ${env.GEMINI_MODEL}` : 'WARNING — GEMINI_API_KEY missing, will fall back to mock'})`
+    );
+    return;
+  }
+  const ok = Boolean(env.OPENAI_API_KEY?.trim());
+  console.log(
+    `[GSP] AI provider: openai (${ok ? `model ${env.OPENAI_MODEL}` : 'WARNING — OPENAI_API_KEY missing, will fall back to mock'})`
   );
 }

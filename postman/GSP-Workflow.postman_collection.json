@@ -225,6 +225,21 @@
             "header": [{ "key": "X-User-Id", "value": "{{qaUserId}}" }],
             "url": "{{baseUrl}}/applications/{{applicationId}}/ai-assessment"
           }
+        },
+        {
+          "name": "Refresh AI assessment (force)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-User-Id", "value": "{{qaUserId}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"force\": true\n}"
+            },
+            "url": "{{baseUrl}}/applications/{{applicationId}}/ai-assessment/refresh"
+          }
         }
       ]
     }
